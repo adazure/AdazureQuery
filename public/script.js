@@ -38,10 +38,20 @@ class AdazureCollectionActions extends AdazureGlobalActions {
         this.last = function() { return list[list.length - 1]; }
         this.odd = function() {
             var result = new AdazureCollection([]);
-            list.filter((e, i) => result.__value = Math.abs(i % 2) == 1);
+            list.filter((e, i) => {
+                if (Math.abs(i % 2) == 1)
+                    result.__value = e;
+            });
             return result;
         }
-        this.even = function() { return list.filter((e, i) => i % 2 == 0); }
+        this.even = function() {
+            var result = new AdazureCollection([]);
+            list.filter((e, i) => {
+                if (i % 2 == 0)
+                    result.__value = e;
+            });
+            return result;
+        }
     }
 }
 
