@@ -36,7 +36,11 @@ class AdazureCollectionActions extends AdazureGlobalActions {
         this.get = function(index) { return list[index]; }
         this.first = function() { return list[0]; }
         this.last = function() { return list[list.length - 1]; }
-        this.odd = function() { return list.filter((e, i) => Math.abs(i % 2) == 1); }
+        this.odd = function() {
+            var result = new AdazureCollection([]);
+            list.filter((e, i) => result.__value = Math.abs(i % 2) == 1);
+            return result;
+        }
         this.even = function() { return list.filter((e, i) => i % 2 == 0); }
     }
 }
@@ -57,6 +61,11 @@ class AdazureElement extends AdazureElementActions {
 class AdazureCollection extends AdazureCollectionActions {
     constructor(list) {
         super(list);
+        Object.defineProperty(this, 'length', {
+            get: function() {
+                return list.length;
+            }
+        });
         Object.defineProperty(this, '__value', {
             set: function(value) {
                 list.push(value);
