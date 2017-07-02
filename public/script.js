@@ -1,32 +1,110 @@
 class AdazureGlobalActions {
     constructor(obj, types) {
         var self = this;
-        self.setClass = function(...params) {
-            if (obj.length) {
-                for (var i = 0; i < obj.length; i++) {
-                    for (var s = 0; s < params.length; s++) {
-                        self.addClass(obj[i].__target, params[s]);
-                    }
-                }
-            } else {
-                for (var s = 0; s < params.length; s++) {
-                    self.addClass(obj, params[s]);
-                }
+
+        var config = {
+            each: function(arr, action) {
+                for (var i = 0; i < arr.length; i++)
+                    action(arr[i], i);
+            },
+
+            setClass: function(obj, value) {
+                obj.classList.add(value);
+            },
+
+            remClass: function(obj, value) {
+                obj.classList.remove(value);
+            },
+
+            setCSS: function(obj, key, value) {
+                obj.style[key] = value;
             }
         }
-        this.remClass = function() {}
-        this.setCSS = function() {}
+
+
+        var _obj = types ? obj : [obj];
+        self.setClass = function(...params) {
+            config.each(_obj, function(val) {
+                config.each(params, function(par) {
+                    config.setClass(val.target || val, par);
+                });
+            });
+        }
+
+        this.remClass = function(...params) {
+            config.each(_obj, function(val) {
+                config.each(params, function(par) {
+                    config.remClass(val.target || val, par);
+                });
+            });
+        }
+        this.setCSS = function(args) {
+
+            var arr1 = arguments[0];
+            var arr2 = arguments[1];
+
+            if (typeof arr1 === 'string' && typeof arr2 === 'string') {
+                config.each(_obj, function(val) {
+                    config.setCSS(val.target || val, arr1, arr2);
+                });
+            } else if (typeof args === 'object')
+                config.each(_obj, function(val) {
+                    Object.keys(args).forEach(function(key) {
+                        config.setCSS(val.target || val, key, args[key]);
+                    });
+                });
+        }
+        this.show = function() {
+            config.each(_obj, function(val) {
+                config.setCSS(obj.target || obj, 'display', 'block');
+            });
+        }
+        this.hide = function() {
+            config.each(_obj, function(val) {
+                config.setCSS(obj.target || obj, 'display', 'none');
+            });
+        }
+
+        this.remove = function() {
+            config.each(_obj, function(val) {
+                val.target.parentNode.removeChild(val.target);
+            })
+            if (types) {
+                obj.del;
+                console.log(obj);
+            }
+        }
     }
 
-    addClass(obj, value) {
-        obj.classList.add(value);
-    }
+
 }
 
 class AdazureElementActions extends AdazureGlobalActions {
     constructor(obj) {
+
         super(obj, false);
+
+        var config = {
+            style: {
+
+            },
+            attr: {
+
+            }
+        }
+
         this.hasClass = function() {}
+
+        this.html = function() {
+            if (arguments.length == 0)
+                return obj.target.innerHTML;
+            else
+                obj.target.innerHTML = arguments[0];
+        }
+
+        this.text = function() {
+            return obj.innerText;
+        }
     }
 }
 
@@ -36,11 +114,12 @@ class AdazureCollectionActions extends AdazureGlobalActions {
         this.get = function(index) { return list[index]; }
         this.first = function() { return list[0]; }
         this.last = function() { return list[list.length - 1]; }
+        this.each = function(action) { for (var i = 0; i < list.length; i++) action(list[i], i); }
         this.odd = function() {
             var result = new AdazureCollection([]);
             list.filter((e, i) => {
                 if (Math.abs(i % 2) == 1)
-                    result.__value = e;
+                    result.value = e;
             });
             return result;
         }
@@ -48,7 +127,7 @@ class AdazureCollectionActions extends AdazureGlobalActions {
             var result = new AdazureCollection([]);
             list.filter((e, i) => {
                 if (i % 2 == 0)
-                    result.__value = e;
+                    result.value = e;
             });
             return result;
         }
@@ -59,7 +138,8 @@ class AdazureElement extends AdazureElementActions {
 
     constructor(el) {
         super(el);
-        Object.defineProperty(this, '__target', {
+
+        Object.defineProperty(this, 'target', {
             get: function() {
                 return el;
             }
@@ -72,11 +152,12 @@ class AdazureCollection extends AdazureCollectionActions {
     constructor(list) {
         super(list);
         Object.defineProperty(this, 'length', {
+            configurable: true,
             get: function() {
                 return list.length;
             }
         });
-        Object.defineProperty(this, '__value', {
+        Object.defineProperty(this, 'value', {
             set: function(value) {
                 list.push(value);
             }
@@ -84,66 +165,131 @@ class AdazureCollection extends AdazureCollectionActions {
     }
 }
 
-class Adazure {
+class AdazureHelper {
 
-    constructor() {}
+    // Gelen metnin ilk harfini kucuk, diğerlerini büyük olarak yapar.
+    textCapitalize(text) {
 
-    setNames(value) {
+        // Geri döndürülecek metin nesnesi
         var name = [];
-        var st = value.split('-');
-        for (var i = 0; i < st.length; i++) {
 
+        // Metni - işaretlerinden parçalıyoruz
+        var names = text.split('-');
+
+        // Parça sayısı kadar döndürüyoruz
+        for (var i = 0; i < names.length; i++) {
+
+            // İlk gelen metni küçük yapar
             if (i == 0)
-                name.push(st[0].toLowerCase());
+                name.push(names[0].toLowerCase());
+
+            // Sonra gelecek olan tüm metinlerin ilk harfini büyük yapar
             else {
-                var first = st[i].charAt(0).toUpperCase();
-                var second = st[i].substring(1).toLowerCase();
-                var result = first + second;
-                name.push(result);
+                name.push(names[i].charAt(0).toUpperCase() + names[i].substring(1).toLowerCase());
             }
         }
+
         return name.join('');
     }
 
-    find(args) {
+
+
+
+    getAllSubElements(args) {
+
+        // Gelen args nesnesi içindeki tüm nesneleri bulur ve işler
         for (var i = 0, el = args.children; i < el.length; i++) {
+
+            // ID değeri varsa
             var id = el[i].id;
+
+            // Name değeri varsa
             var name = el[i].name;
+
+            // Nesnenin tag name değerini al
             var tagName = el[i].tagName.toLowerCase();
+
+            // Gelen elementi, bizim oluşturduğumuz özel elemente ata
             var element = new AdazureElement(el[i]);
 
+            // Bulunan nesnenin tag name değerinde bir collection oluşturur
             if (!adazure[tagName]) {
-                adazure[tagName] = new AdazureCollection([]);
-                adazure[tagName].__value = element;
-            } else {
-                adazure[tagName].__value = element;
+                this.property(adazure, tagName, {
+                    configurable: true,
+                    value: new AdazureCollection([])
+                });
+                this.property(adazure[tagName], 'del', {
+                    configurable: true,
+                    get: function() {
+                        delete adazure[tagName];
+                    }
+                });
+                //adazure[tagName].value = element;
             }
+
+
+            adazure[tagName].value = element;
 
             if (id) {
-                adazure.id[this.setNames(id)] = element;
+                adazure.id.value = element;
             }
             if (name) {
-                adazure.name[this.setNames(name)] = element;
+                adazure.name.value = element;
             }
 
-            this.find(el[i]);
+            this.getAllSubElements(el[i]);
         }
     }
+
+    property(obj, prop, setting) {
+        Object.defineProperty(obj, prop, setting);
+    }
+
+}
+
+class AdazureObject extends AdazureHelper {
+
+    constructor() {
+        super();
+
+        var self = this;
+        self.id = {};
+        self.name = {};
+
+        self.property(self.id, 'value', {
+            set: function(element) {
+                self.id[self.textCapitalize(element.target.id)] = new AdazureElement(element);
+            }
+        });
+
+        self.property(self.name, 'value', {
+            set: function(element) {
+                self.name[self.textCapitalize(element.target.name)] = new AdazureElement(element);
+            }
+        });
+    }
+
+}
+
+class Adazure extends AdazureObject {
+
+    constructor() { super(); }
 
     init() {
         if (!adazure.__instance) {
 
-            adazure.id = {};
-            adazure.name = {};
-
+            console.log(new Date().toUTCString());
             var body = document.querySelector('body');
-            this.find(body);
+            this.getAllSubElements(body);
 
-            Object.defineProperty(adazure, '__instance', {
+            this.property(adazure, '__instance', {
                 get: function() {
                     return "Adazure";
                 }
             });
+
+
+            console.log(new Date().toUTCString());
         }
     }
 
