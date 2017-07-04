@@ -15,39 +15,25 @@
 
     <div>
         <ul id="news-content">
-            <li><label class="modern">elma1</label></li>
-            <li><label class="stepher">armut1</label></li>
-            <li><label class="combo">elma2</label></li>
-            <li><label class="combo">armut2</label></li>
-            <li><label class="tramper">elma3</label></li>
-            <li><span class="glass">armut3</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
-            <li><span class="glass">armutix</span></li>
+            <li><label class="modern">ELMA</label></li>
+            <li><label class="stepher">KARPUZ</label></li>
+            <li><label class="combo">KAVUN</label></li>
 
         </ul>
     </div>
 
-    <p>Hello</p>
-    <div>How is it going?</div>
-    <span>Blind</span>
+    <p id="clubber">Hello</p>
+    <div id="modern-art">How is it going?</div>
+    <span id="global-sinematic-news">Blind</span>
 
+    <script src="jss.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
-        function islem() {
-            var n = Adazure.children.length;
-            for (var i = 0; i < Adazure.children.length; i++) {
-                console.log(i);
-            }
-            alert(n);
+        function mil(startDate, endDate) {
+            var seconds = (endDate.getTime() - startDate.getTime()) / 1000;
+            return seconds;
         }
     </script>
-    <script src="script2.js"></script>
 </body>
 
 </html>

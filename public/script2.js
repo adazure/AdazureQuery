@@ -23,7 +23,7 @@ class Helper {
     static parseElement(el) {
         var t = new AdazureElement(el);
         for (var i = 0, q = el.children; i < q.length; i++) {
-            Helper.root(q[i], q[i].tagName, t);
+            Helper.root(q[i], q[i].tagName.toLowerCase(), t);
         }
         return t;
     }
@@ -43,7 +43,7 @@ class Helper {
 
     static getType(el) {
         var e = typeof el;
-        return e === 'object' ? el.tagName : e;
+        return e === 'object' ? el.tagName.toLowerCase() : e;
     }
 
     static textCapitalize(text) {
@@ -115,7 +115,7 @@ class AdazureElementActions extends AdazureGlobalActions {
                     // ELEMENT, 'DIV', 0
                     for (var i = 0; i < element.children.length; i++) {
                         var child = element.children[i];
-                        var tagname = child.tagName;
+                        var tagname = child.tagName.toLowerCase();
                         var v = Helper.parseElement(child);
                         view.__setvalue__ = v;
                     }
@@ -225,24 +225,38 @@ class AdazureCollection extends AdazureCollectionActions {
     }
 }
 
-Helper.define(window, 'Adazure', {
-    get: function() {
-        var view = Helper.parseElement(document.body);
 
-        Helper.defines(view, {
+class AdazureQuery {
 
-            'id': {
-                get: function() {
-                    var data = {};
-                    var all = document.querySelectorAll('[id]');
-                    Helper.each(all, function(e) {
-                        var id = Helper.textCapitalize(e.id);
-                        data[id] = Helper.parseElement(e);
-                    });
-                    return data;
-                }
+    constructor() {
+        var self = this;
+
+        Helper.define(window, 'Adazure', {
+            get: function() {
+                var view = Helper.parseElement(document.body);
+                Helper.defines(view, {
+                    'id': {
+                        get: function() {
+
+                            var data = {};
+                            var all = document.querySelectorAll('[id]');
+                            Helper.each(all, function(e) {
+                                var id = Helper.textCapitalize(e.id);
+                                data[id] = Helper.parseElement(e);
+                            });
+                            self._cache = data;
+                            return self._cache;
+
+                        }
+                    }
+                })
+                return view;
             }
-        })
-        return view;
+        });
     }
-});
+
+
+
+}
+
+var caching = new AdazureQuery();
